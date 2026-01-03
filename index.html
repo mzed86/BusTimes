@@ -2,9 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Dunnage Crescent Bus Times</title>
 <link rel="stylesheet" href="style.css">
+<!-- iOS fullscreen and web app meta tags -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#121212">
+<link rel="manifest" href="manifest.json">
 </head>
 <body>
   <div id="container">
@@ -13,5 +18,12 @@
     <div id="last-updated"></div>
   </div>
 <script src="script.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('service-worker.js');
+    });
+  }
+</script>
 </body>
 </html>

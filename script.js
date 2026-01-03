@@ -41,6 +41,13 @@ async function fetchBusTimes() {
     }
 }
 
+// Scroll trick to minimize Safari iOS URL bar
+function minimizeURLBar() {
+  window.scrollTo(0, 1);
+}
+window.addEventListener('load', minimizeURLBar);
+window.addEventListener('touchstart', minimizeURLBar);
+
 // initial fetch
 fetchBusTimes();
 
