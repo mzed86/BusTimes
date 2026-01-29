@@ -3,19 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Dunnage Crescent Bus Times</title>
+<title>Bus Times</title>
 <link rel="stylesheet" href="style.css">
 <!-- iOS fullscreen and web app meta tags -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bus Times">
 <meta name="theme-color" content="#121212">
 <link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
   <div id="container">
-    <h1>Dunnage Crescent 🚌</h1>
-    <div id="bus-list">Loading...</div>
-    <div id="last-updated"></div>
+    <header id="header">
+      <h1>🚌 Bus Times</h1>
+      <div id="status-bar">
+        <span id="network-status"></span>
+        <span id="refresh-countdown"></span>
+      </div>
+    </header>
+    <div id="bus-list">
+      <div class="loading-spinner"></div>
+      <div>Loading...</div>
+    </div>
+    <footer id="footer">
+      <div id="last-updated"></div>
+      <div id="tap-hint">Tap anywhere to refresh</div>
+    </footer>
   </div>
 <script src="script.js"></script>
 <script>
