@@ -16,7 +16,7 @@
 <body>
   <div id="container">
     <header id="header">
-      <h1>🚌 Bus Times</h1>
+      <h1 id="app-title">🚌 Bus Times</h1>
       <div id="status-bar">
         <span id="network-status"></span>
         <span id="refresh-countdown"></span>
@@ -31,6 +31,43 @@
       <div id="tap-hint">Tap anywhere to refresh</div>
     </footer>
   </div>
+
+  <!-- Hidden Settings Panel (long-press header to access) -->
+  <div id="settings-overlay" class="hidden">
+    <div id="settings-panel">
+      <h2>Configure Stops</h2>
+      <p class="settings-hint">Search for a bus stop by name or postcode</p>
+
+      <div class="search-box">
+        <input type="text" id="stop-search" placeholder="e.g. Oxford Street or SW1A 1AA">
+        <button id="search-btn">Search</button>
+      </div>
+
+      <div id="search-results"></div>
+
+      <div id="selected-stops">
+        <h3>Selected Stops</h3>
+        <div class="selected-stop">
+          <label>Direction 1:</label>
+          <span id="stop1-name">Not set</span>
+          <button class="clear-btn" data-stop="1">✕</button>
+        </div>
+        <div class="selected-stop">
+          <label>Direction 2:</label>
+          <span id="stop2-name">Not set</span>
+          <button class="clear-btn" data-stop="2">✕</button>
+        </div>
+      </div>
+
+      <div class="settings-actions">
+        <button id="save-settings">Save & Close</button>
+        <button id="cancel-settings">Cancel</button>
+      </div>
+
+      <p class="settings-footer">Long-press title to access settings again</p>
+    </div>
+  </div>
+
 <script src="script.js"></script>
 <script>
   if ('serviceWorker' in navigator) {

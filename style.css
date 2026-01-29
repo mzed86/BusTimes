@@ -228,3 +228,269 @@ h1 {
     font-size: 0.7em;
     margin-left: 10px;
 }
+
+/* ============================================
+   Settings Panel (hidden by default)
+   Long-press title to access
+   ============================================ */
+
+#settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+#settings-overlay.hidden {
+    display: none;
+}
+
+#settings-panel {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    width: 100%;
+    max-width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#settings-panel h2 {
+    margin: 0 0 5px 0;
+    font-size: 1.4em;
+    text-align: center;
+}
+
+#settings-panel h3 {
+    margin: 20px 0 10px 0;
+    font-size: 1em;
+    color: #888;
+}
+
+.settings-hint {
+    color: #666;
+    font-size: 0.85em;
+    text-align: center;
+    margin: 0 0 15px 0;
+}
+
+.settings-footer {
+    color: #444;
+    font-size: 0.75em;
+    text-align: center;
+    margin: 20px 0 0 0;
+}
+
+/* Search box */
+.search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #333;
+    border-radius: 8px;
+    background: #222;
+    color: #fff;
+    font-size: 16px; /* Prevents iOS zoom */
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+.search-box input::placeholder {
+    color: #555;
+}
+
+.search-box button {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px;
+    background: #1e88e5;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.search-box button:active {
+    background: #1565c0;
+}
+
+/* Search results */
+#search-results {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.search-result {
+    padding: 12px;
+    background: #252525;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.search-result:active {
+    background: #333;
+}
+
+.search-result .stop-name {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.search-result .stop-direction {
+    font-size: 0.85em;
+    color: #888;
+}
+
+.search-result .stop-lines {
+    font-size: 0.8em;
+    color: #1e88e5;
+    margin-top: 4px;
+}
+
+.search-result-hint {
+    color: #666;
+    font-size: 0.9em;
+    text-align: center;
+    padding: 10px;
+}
+
+.search-loading {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+}
+
+/* Selected stops */
+#selected-stops {
+    background: #222;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.selected-stop {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #333;
+}
+
+.selected-stop:last-child {
+    border-bottom: none;
+}
+
+.selected-stop label {
+    color: #888;
+    font-size: 0.9em;
+    min-width: 80px;
+}
+
+.selected-stop span {
+    flex: 1;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.selected-stop .not-set {
+    color: #666;
+    font-style: italic;
+}
+
+.clear-btn {
+    background: #f44336;
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.clear-btn:active {
+    background: #c62828;
+}
+
+/* Settings action buttons */
+.settings-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.settings-actions button {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#save-settings {
+    background: #4CAF50;
+    color: white;
+}
+
+#save-settings:active {
+    background: #388E3C;
+}
+
+#cancel-settings {
+    background: #333;
+    color: #888;
+}
+
+#cancel-settings:active {
+    background: #444;
+}
+
+/* Setup prompt (shown when no stops configured) */
+.setup-prompt {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.setup-prompt h2 {
+    margin: 0 0 10px 0;
+}
+
+.setup-prompt p {
+    color: #888;
+    margin: 0 0 20px 0;
+}
+
+.setup-prompt button {
+    padding: 14px 30px;
+    border: none;
+    border-radius: 8px;
+    background: #1e88e5;
+    color: white;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.setup-prompt button:active {
+    background: #1565c0;
+}
