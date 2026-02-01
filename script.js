@@ -529,6 +529,9 @@ function startCountdown() {
     countdownTimer = setInterval(() => {
         secondsUntilRefresh--;
 
+        // Update audio toggle to reflect commute window changes
+        updateAudioToggleDisplay();
+
         if (secondsUntilRefresh <= 0) {
             fetchBusTimes();
             fetchTubeStatus();
@@ -637,14 +640,24 @@ function toggleAudio(e) {
 }
 
 function updateAudioToggleDisplay() {
-    if (audioEnabled) {
+    const inCommute = isInAnnouncementWindow();
+    audioToggle.classList.remove('audio-off', 'audio-on', 'audio-auto');
+
+    if (inCommute) {
+        // During commute: always on (auto mode)
         audioToggle.textContent = '🔊';
-        audioToggle.classList.remove('audio-off');
+        audioToggle.classList.add('audio-auto');
+        audioToggle.title = 'Audio auto-enabled (8:15-9:30 AM)';
+    } else if (audioEnabled) {
+        // Outside commute, manually enabled
+        audioToggle.textContent = '🔊';
         audioToggle.classList.add('audio-on');
+        audioToggle.title = 'Audio on (tap to disable)';
     } else {
+        // Outside commute, disabled
         audioToggle.textContent = '🔇';
-        audioToggle.classList.remove('audio-on');
         audioToggle.classList.add('audio-off');
+        audioToggle.title = 'Audio off (tap to enable)';
     }
 }
 
@@ -660,10 +673,13 @@ function isInAnnouncementWindow() {
 }
 
 function checkAndAnnounceBuses(arrivalsResults) {
-    if (!audioEnabled || !isInAnnouncementWindow()) return;
+    // During 8:15-9:30 AM: always announce (automatic)
+    // Outside that window: only announce if user has toggled audio on
+    const inCommute = isInAnnouncementWindow();
+    if (!inCommute && !audioEnabled) return;
     if (!('speechSynthesis' in window)) return;
 
-    // Find Canada Water direction (first stop by default)
+    // Find Canada Water direction
     const canadaWaterIdx = stopInfo.findIndex(info =>
         info.direction && info.direction.toLowerCase().includes('canada water')
     );
