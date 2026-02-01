@@ -741,8 +741,3 @@ function unlockAudioOnIOS() {
 
     speechSynthesis.speak(utterance);
 }
-        utterance.voice = britishVoice;
-    }
-
-    speechSynthesis.speak(utterance);
-}
