@@ -32,6 +32,7 @@ const saveSettingsBtn = document.getElementById("save-settings");
 const cancelSettingsBtn = document.getElementById("cancel-settings");
 const tubeStatusEl = document.getElementById("tube-status");
 const tubeStatusText = document.getElementById("tube-status-text");
+const audioToggle = document.getElementById("audio-toggle");
 
 // State
 let countdownTimer = null;
@@ -42,6 +43,11 @@ let stopInfo = [];
 let longPressTimer = null;
 let pendingStopConfig = { stop1: null, stop2: null };
 let selectingSlot = null; // Which slot we're selecting (1 or 2)
+
+// Audio announcement state
+const AUDIO_CONFIG_KEY = 'busTimesAudioEnabled';
+let audioEnabled = false;
+let announcedBuses = new Set(); // Track announced bus IDs to avoid repeats
 
 // Initialize
 init();
@@ -91,6 +97,10 @@ function init() {
 
     // Try to keep screen awake
     requestWakeLock();
+
+    // Audio toggle
+    loadAudioPreference();
+    audioToggle.addEventListener('click', toggleAudio);
 }
 
 function loadConfig() {
@@ -440,6 +450,11 @@ function renderBusTimes(arrivalsResults, fromCache) {
     });
 
     busList.innerHTML = html;
+
+    // Check for audio announcements (only for fresh data, not cached)
+    if (!fromCache) {
+        checkAndAnnounceBuses(arrivalsResults);
+    }
 }
 
 function getTimeClass(minutes) {
@@ -590,4 +605,109 @@ async function fetchTubeStatus() {
         // Hide on error - don't show stale data
         tubeStatusEl.classList.add('hidden');
     }
+}
+
+// Audio Announcements
+function loadAudioPreference() {
+    try {
+        const saved = localStorage.getItem(AUDIO_CONFIG_KEY);
+        audioEnabled = saved === 'true';
+    } catch (e) {
+        audioEnabled = false;
+    }
+    updateAudioToggleDisplay();
+}
+
+function toggleAudio(e) {
+    e.stopPropagation(); // Don't trigger refresh
+    audioEnabled = !audioEnabled;
+    try {
+        localStorage.setItem(AUDIO_CONFIG_KEY, audioEnabled.toString());
+    } catch (e) {
+        // Storage might be full
+    }
+    updateAudioToggleDisplay();
+
+    // Clear announced buses when toggling on so fresh announcements can happen
+    if (audioEnabled) {
+        announcedBuses.clear();
+    }
+}
+
+function updateAudioToggleDisplay() {
+    if (audioEnabled) {
+        audioToggle.textContent = '🔊';
+        audioToggle.classList.remove('audio-off');
+        audioToggle.classList.add('audio-on');
+    } else {
+        audioToggle.textContent = '🔇';
+        audioToggle.classList.remove('audio-on');
+        audioToggle.classList.add('audio-off');
+    }
+}
+
+function isInAnnouncementWindow() {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const timeValue = hours * 60 + minutes;
+
+    // 8:15 AM = 8*60 + 15 = 495
+    // 9:30 AM = 9*60 + 30 = 570
+    return timeValue >= 495 && timeValue <= 570;
+}
+
+function checkAndAnnounceBuses(arrivalsResults) {
+    if (!audioEnabled || !isInAnnouncementWindow()) return;
+    if (!('speechSynthesis' in window)) return;
+
+    // Find Canada Water direction (first stop by default)
+    const canadaWaterIdx = stopInfo.findIndex(info =>
+        info.direction && info.direction.toLowerCase().includes('canada water')
+    );
+
+    if (canadaWaterIdx === -1) return;
+
+    const arrivals = arrivalsResults[canadaWaterIdx];
+    if (!arrivals || arrivals.length === 0) return;
+
+    // Check each bus for 5-minute warning
+    arrivals.forEach(bus => {
+        const minutes = Math.floor(bus.timeToStation / 60);
+        const busKey = `${bus.vehicleId}-${bus.lineName}`;
+
+        // Announce at exactly 5 minutes (or just under, to catch the window)
+        if (minutes === 5 && !announcedBuses.has(busKey)) {
+            announcedBuses.add(busKey);
+            announceBus(bus.lineName, minutes);
+        }
+    });
+
+    // Clean up old announced buses (remove ones no longer in arrivals)
+    const currentBusKeys = new Set(arrivals.map(bus => `${bus.vehicleId}-${bus.lineName}`));
+    announcedBuses.forEach(key => {
+        if (!currentBusKeys.has(key)) {
+            announcedBuses.delete(key);
+        }
+    });
+}
+
+function announceBus(lineName, minutes) {
+    const utterance = new SpeechSynthesisUtterance(
+        `Bus ${lineName} to Canada Water in ${minutes} minutes`
+    );
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    // Use a British voice if available
+    const voices = speechSynthesis.getVoices();
+    const britishVoice = voices.find(v =>
+        v.lang.includes('en-GB') || v.lang.includes('en_GB')
+    );
+    if (britishVoice) {
+        utterance.voice = britishVoice;
+    }
+
+    speechSynthesis.speak(utterance);
 }

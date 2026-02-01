@@ -258,6 +258,38 @@ h1 {
     color: #f44336;
 }
 
+#footer-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+#audio-toggle {
+    background: #222;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+#audio-toggle:active {
+    background: #333;
+}
+
+#audio-toggle.audio-off {
+    opacity: 0.5;
+}
+
+#audio-toggle.audio-on {
+    background: rgba(76, 175, 80, 0.2);
+    border-color: #4CAF50;
+    opacity: 1;
+}
+
 #tap-hint {
     font-size: 0.75em;
     color: #444;
