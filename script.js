@@ -631,6 +631,8 @@ function toggleAudio(e) {
     // Clear announced buses when toggling on so fresh announcements can happen
     if (audioEnabled) {
         announcedBuses.clear();
+        // Play a short test utterance to unlock iOS audio
+        unlockAudioOnIOS();
     }
 }
 
@@ -676,8 +678,9 @@ function checkAndAnnounceBuses(arrivalsResults) {
         const minutes = Math.floor(bus.timeToStation / 60);
         const busKey = `${bus.vehicleId}-${bus.lineName}`;
 
-        // Announce at exactly 5 minutes (or just under, to catch the window)
-        if (minutes === 5 && !announcedBuses.has(busKey)) {
+        // Announce when bus is at 5 minutes or just crossed into 4 minutes
+        // (catches the window even with 30-second refresh intervals)
+        if (minutes >= 4 && minutes <= 5 && !announcedBuses.has(busKey)) {
             announcedBuses.add(busKey);
             announceBus(bus.lineName, minutes);
         }
@@ -697,6 +700,28 @@ function announceBus(lineName, minutes) {
         `Bus ${lineName} to Canada Water in ${minutes} minutes`
     );
     utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    // Use a British voice if available
+    const voices = speechSynthesis.getVoices();
+    const britishVoice = voices.find(v =>
+        v.lang.includes('en-GB') || v.lang.includes('en_GB')
+    );
+    if (britishVoice) {
+        utterance.voice = britishVoice;
+    }
+
+    speechSynthesis.speak(utterance);
+}
+
+function unlockAudioOnIOS() {
+    // iOS requires speech synthesis to be triggered by user gesture
+    // Play a silent/short utterance to unlock it for future announcements
+    if (!('speechSynthesis' in window)) return;
+
+    const utterance = new SpeechSynthesisUtterance('Audio enabled');
+    utterance.rate = 1;
     utterance.pitch = 1;
     utterance.volume = 1;
 
