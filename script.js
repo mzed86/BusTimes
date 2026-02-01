@@ -30,6 +30,8 @@ const stop1Name = document.getElementById("stop1-name");
 const stop2Name = document.getElementById("stop2-name");
 const saveSettingsBtn = document.getElementById("save-settings");
 const cancelSettingsBtn = document.getElementById("cancel-settings");
+const tubeStatusEl = document.getElementById("tube-status");
+const tubeStatusText = document.getElementById("tube-status-text");
 
 // State
 let countdownTimer = null;
@@ -53,6 +55,7 @@ function init() {
         showSetupPrompt();
     } else {
         fetchBusTimes();
+        fetchTubeStatus();
         startCountdown();
     }
 
@@ -329,6 +332,7 @@ function saveSettings() {
 
     // Refresh display
     fetchBusTimes();
+    fetchTubeStatus();
 
     // Start countdown if not already running
     if (!countdownTimer) {
@@ -343,6 +347,7 @@ function handleTapRefresh(e) {
     e.preventDefault();
     if (!isRefreshing && stopInfo.length > 0) {
         fetchBusTimes();
+        fetchTubeStatus();
         resetCountdown();
     }
 }
@@ -511,6 +516,7 @@ function startCountdown() {
 
         if (secondsUntilRefresh <= 0) {
             fetchBusTimes();
+            fetchTubeStatus();
             resetCountdown();
         } else {
             refreshCountdown.textContent = `↻ ${secondsUntilRefresh}s`;
@@ -538,5 +544,50 @@ async function requestWakeLock() {
         } catch (e) {
             // Wake lock not supported or denied - that's okay
         }
+    }
+}
+
+// Jubilee Line Status
+async function fetchTubeStatus() {
+    try {
+        const response = await fetch('https://api.tfl.gov.uk/Line/jubilee/Status');
+        if (!response.ok) throw new Error('API error');
+
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+            const line = data[0];
+            const status = line.lineStatuses && line.lineStatuses[0];
+
+            if (status) {
+                const severity = status.statusSeverity;
+                const description = status.statusSeverityDescription;
+                const reason = status.reason || '';
+
+                // Show the tube status element
+                tubeStatusEl.classList.remove('hidden');
+
+                // Update status classes based on severity
+                // 10 = Good Service, lower numbers = disruptions
+                tubeStatusEl.classList.remove('tube-good', 'tube-minor', 'tube-severe');
+
+                if (severity >= 10) {
+                    // Good service - hide the status bar (only show disruptions)
+                    tubeStatusEl.classList.add('hidden');
+                } else if (severity >= 5) {
+                    // Minor delays
+                    tubeStatusEl.classList.add('tube-minor');
+                    tubeStatusText.textContent = reason || description;
+                } else {
+                    // Severe disruption
+                    tubeStatusEl.classList.add('tube-severe');
+                    tubeStatusText.textContent = reason || description;
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Tube status fetch error:', error);
+        // Hide on error - don't show stale data
+        tubeStatusEl.classList.add('hidden');
     }
 }
