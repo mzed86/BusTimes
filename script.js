@@ -712,41 +712,35 @@ function checkAndAnnounceBuses(arrivalsResults) {
 }
 
 function announceBus(lineName, minutes) {
+    // Cancel any ongoing speech first
+    speechSynthesis.cancel();
+
     const utterance = new SpeechSynthesisUtterance(
         `Bus ${lineName} to Canada Water in ${minutes} minutes`
     );
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
     utterance.volume = 1;
-
-    // Use a British voice if available
-    const voices = speechSynthesis.getVoices();
-    const britishVoice = voices.find(v =>
-        v.lang.includes('en-GB') || v.lang.includes('en_GB')
-    );
-    if (britishVoice) {
-        utterance.voice = britishVoice;
-    }
+    utterance.lang = 'en-GB';
 
     speechSynthesis.speak(utterance);
 }
 
 function unlockAudioOnIOS() {
     // iOS requires speech synthesis to be triggered by user gesture
-    // Play a silent/short utterance to unlock it for future announcements
+    // Play a short utterance to unlock it for future announcements
     if (!('speechSynthesis' in window)) return;
 
-    const utterance = new SpeechSynthesisUtterance('Audio enabled');
-    utterance.rate = 1;
-    utterance.pitch = 1;
-    utterance.volume = 1;
+    speechSynthesis.cancel();
 
-    // Use a British voice if available
-    const voices = speechSynthesis.getVoices();
-    const britishVoice = voices.find(v =>
-        v.lang.includes('en-GB') || v.lang.includes('en_GB')
-    );
-    if (britishVoice) {
+    const utterance = new SpeechSynthesisUtterance('Audio enabled');
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1;
+    utterance.lang = 'en-GB';
+
+    speechSynthesis.speak(utterance);
+}
         utterance.voice = britishVoice;
     }
 
