@@ -290,6 +290,12 @@ h1 {
     opacity: 1;
 }
 
+#audio-toggle.audio-auto {
+    background: rgba(33, 150, 243, 0.2);
+    border-color: #2196F3;
+    opacity: 1;
+}
+
 #tap-hint {
     font-size: 0.75em;
     color: #444;

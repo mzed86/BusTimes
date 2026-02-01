@@ -529,6 +529,9 @@ function startCountdown() {
     countdownTimer = setInterval(() => {
         secondsUntilRefresh--;
 
+        // Update audio toggle to reflect commute window changes
+        updateAudioToggleDisplay();
+
         if (secondsUntilRefresh <= 0) {
             fetchBusTimes();
             fetchTubeStatus();
@@ -631,18 +634,30 @@ function toggleAudio(e) {
     // Clear announced buses when toggling on so fresh announcements can happen
     if (audioEnabled) {
         announcedBuses.clear();
+        // Play a short test utterance to unlock iOS audio
+        unlockAudioOnIOS();
     }
 }
 
 function updateAudioToggleDisplay() {
-    if (audioEnabled) {
+    const inCommute = isInAnnouncementWindow();
+    audioToggle.classList.remove('audio-off', 'audio-on', 'audio-auto');
+
+    if (inCommute) {
+        // During commute: always on (auto mode)
         audioToggle.textContent = '🔊';
-        audioToggle.classList.remove('audio-off');
+        audioToggle.classList.add('audio-auto');
+        audioToggle.title = 'Audio auto-enabled (8:15-9:30 AM)';
+    } else if (audioEnabled) {
+        // Outside commute, manually enabled
+        audioToggle.textContent = '🔊';
         audioToggle.classList.add('audio-on');
+        audioToggle.title = 'Audio on (tap to disable)';
     } else {
+        // Outside commute, disabled
         audioToggle.textContent = '🔇';
-        audioToggle.classList.remove('audio-on');
         audioToggle.classList.add('audio-off');
+        audioToggle.title = 'Audio off (tap to enable)';
     }
 }
 
@@ -658,10 +673,13 @@ function isInAnnouncementWindow() {
 }
 
 function checkAndAnnounceBuses(arrivalsResults) {
-    if (!audioEnabled || !isInAnnouncementWindow()) return;
+    // During 8:15-9:30 AM: always announce (automatic)
+    // Outside that window: only announce if user has toggled audio on
+    const inCommute = isInAnnouncementWindow();
+    if (!inCommute && !audioEnabled) return;
     if (!('speechSynthesis' in window)) return;
 
-    // Find Canada Water direction (first stop by default)
+    // Find Canada Water direction
     const canadaWaterIdx = stopInfo.findIndex(info =>
         info.direction && info.direction.toLowerCase().includes('canada water')
     );
@@ -676,8 +694,9 @@ function checkAndAnnounceBuses(arrivalsResults) {
         const minutes = Math.floor(bus.timeToStation / 60);
         const busKey = `${bus.vehicleId}-${bus.lineName}`;
 
-        // Announce at exactly 5 minutes (or just under, to catch the window)
-        if (minutes === 5 && !announcedBuses.has(busKey)) {
+        // Announce when bus is at 5 minutes or just crossed into 4 minutes
+        // (catches the window even with 30-second refresh intervals)
+        if (minutes >= 4 && minutes <= 5 && !announcedBuses.has(busKey)) {
             announcedBuses.add(busKey);
             announceBus(bus.lineName, minutes);
         }
@@ -697,6 +716,28 @@ function announceBus(lineName, minutes) {
         `Bus ${lineName} to Canada Water in ${minutes} minutes`
     );
     utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    // Use a British voice if available
+    const voices = speechSynthesis.getVoices();
+    const britishVoice = voices.find(v =>
+        v.lang.includes('en-GB') || v.lang.includes('en_GB')
+    );
+    if (britishVoice) {
+        utterance.voice = britishVoice;
+    }
+
+    speechSynthesis.speak(utterance);
+}
+
+function unlockAudioOnIOS() {
+    // iOS requires speech synthesis to be triggered by user gesture
+    // Play a silent/short utterance to unlock it for future announcements
+    if (!('speechSynthesis' in window)) return;
+
+    const utterance = new SpeechSynthesisUtterance('Audio enabled');
+    utterance.rate = 1;
     utterance.pitch = 1;
     utterance.volume = 1;
 
